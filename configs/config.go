@@ -1,7 +1,9 @@
 package configs
 
 import (
+	"fmt"
 	"os"
+
 	"github.com/joho/godotenv"
 )
 
@@ -13,9 +15,8 @@ type Config struct {
 	MaxRetries         int
 	IntelligenceHost   string
 	IntelligenceKeyCIB string
-	IntelligenceKeyBCS string
 
-	Logger LoggerConfig
+	LoggerConfig LoggerConfig
 }
 
 type LoggerConfig struct {
@@ -27,23 +28,32 @@ type LoggerConfig struct {
 }
 
 func LoadConfig() *Config {
-	_ = godotenv.Load()
+	envFile := os.Getenv("ENV_FILE")
+	if envFile == "" {
+		envFile = ".env"
+	}
+
+
+	if err := godotenv.Load(envFile); err != nil {
+		fmt.Printf("Warning: Failed to load env file %s\n", envFile)
+	}
+
+	_ = godotenv.Overload(".env.example")
 
 	return &Config{
-		MongoURI:           os.Getenv("MONGO_URI"),
-		MongoDBName:        os.Getenv("MONGO_DB_NAME"),
-		MongoColl:          os.Getenv("MONGO_COLL"),
-		RateLimit:          2,
-		MaxRetries:         3,
-		IntelligenceHost:   os.Getenv("INTELLIGENCE_HOST"),
-		IntelligenceKeyCIB: os.Getenv("INTELLIGENCE_KEY_CIB"),
-		IntelligenceKeyBCS: os.Getenv("INTELLIGENCE_KEY_BCS"),
-		Logger: LoggerConfig{
+		LoggerConfig: LoggerConfig{
 			LogDir:      "./logs",
 			LogFileName: "api_runner.log",
-			LogLevel:    "info",
+			LogLevel:    "debug",
 			LogKeepDays: 30,
 			LogToFile:   true,
 		},
+		MongoURI:           os.Getenv("MONGO_URI"),
+		MongoDBName:        os.Getenv("MONGO_DB_NAME"),
+		MongoColl:          os.Getenv("MONGO_COLL"),
+		RateLimit:          1,
+		MaxRetries:         10,
+		IntelligenceHost:   os.Getenv("INTELLIGENCE_HOST"),
+		IntelligenceKeyCIB: os.Getenv("INTELLIGENCE_KEY_CIB"),
 	}
 }

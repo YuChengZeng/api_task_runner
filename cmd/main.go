@@ -9,13 +9,7 @@ import (
 func main() {
     cfg := configs.LoadConfig()
 
-    logger.Initialize(logger.Config{
-        LogDir:      cfg.LogDir,
-        FileName:    cfg.LogFileName,
-        MaxKeepDays: cfg.LogKeepDays,
-        Level:       cfg.LogLevel,
-        EnableFile:  cfg.LogToFile,
-    })
+    logger.Initialize(cfg.LoggerConfig)
     defer logger.Close()
 
     logger.Logger.Info("Application starting...")
